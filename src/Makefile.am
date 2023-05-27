@@ -818,6 +818,7 @@ bitcoin_tx_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
+  $(CRYPTO_LIBS) \
   $(LIBSECP256K1)
 #
 
@@ -837,6 +838,7 @@ bitcoin_wallet_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1) \
   $(BDB_LIBS) \
+  $(CRYPTO_LIBS) \
   $(SQLITE_LIBS)
 
 if TARGET_WINDOWS
@@ -860,6 +862,7 @@ bitcoin_util_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
+  $(CRYPTO_LIBS) \
   $(LIBSECP256K1)
 #
 
