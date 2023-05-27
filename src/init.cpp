@@ -30,6 +30,7 @@
 #include <interfaces/chain.h>
 #include <interfaces/init.h>
 #include <interfaces/node.h>
+#include <interfaces/wallet.h>
 #include <mapport.h>
 #include <net.h>
 #include <net_permissions.h>
@@ -53,6 +54,8 @@
 #include <policy/fees_args.h>
 #include <policy/policy.h>
 #include <policy/settings.h>
+#include <pos/pos.h>
+#include <pos/minter.h>
 #include <protocol.h>
 #include <rpc/blockchain.h>
 #include <rpc/register.h>
@@ -83,6 +86,7 @@
 #include <validation.h>
 #include <validationinterface.h>
 #include <walletinitinterface.h>
+#include <wallet/wallet.h>
 
 #include <algorithm>
 #include <condition_variable>
@@ -108,6 +112,8 @@
 #include <zmq/zmqnotificationinterface.h>
 #include <zmq/zmqrpc.h>
 #endif
+
+using interfaces::WalletLoader;
 
 using kernel::DumpMempool;
 using kernel::ValidationCacheSizes;
@@ -245,6 +251,9 @@ void Shutdown(NodeContext& node)
     StopREST();
     StopRPC();
     StopHTTPServer();
+#ifdef ENABLE_WALLET
+    StopThreadStakeMiner();
+#endif
     for (const auto& client : node.chain_clients) {
         client->flush();
     }
@@ -611,6 +620,8 @@ void SetupServerArgs(ArgsManager& argsman)
     argsman.AddArg("-rpcwhitelistdefault", "Sets default behavior for rpc whitelisting. Unless rpcwhitelistdefault is set to 0, if any -rpcwhitelist is set, the rpc server acts as if all rpc users are subject to empty-unless-otherwise-specified whitelists. If rpcwhitelistdefault is set to 1 and no -rpcwhitelist is set, rpc server acts as if all rpc users are subject to empty whitelists.", ArgsManager::ALLOW_ANY, OptionsCategory::RPC);
     argsman.AddArg("-rpcworkqueue=<n>", strprintf("Set the depth of the work queue to service RPC calls (default: %d)", DEFAULT_HTTP_WORKQUEUE), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::RPC);
     argsman.AddArg("-server", "Accept command line and JSON-RPC commands", ArgsManager::ALLOW_ANY, OptionsCategory::RPC);
+    argsman.AddArg("-stakethreadconddelayms", "Number of milliseconds to delay staking for on error condition (default: 60000)", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
+    argsman.AddArg("-stakethreadignorepeers", "Ignore the current initialblockdownload state and peer checks when staking (default: false)", ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
 
 #if HAVE_DECL_FORK
     argsman.AddArg("-daemon", strprintf("Run in the background as a daemon and accept commands (default: %d)", DEFAULT_DAEMON), ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
@@ -1850,6 +1861,18 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
     if (!node.connman->Start(*node.scheduler, connOptions)) {
         return false;
     }
+
+    // ********************************************************* Step 12.5: start staking
+#ifdef ENABLE_WALLET
+    size_t num_wallets = 0;
+    if (node.wallet_loader && node.wallet_loader->context()) {
+        auto vpwallets = GetWallets(*node.wallet_loader->context());
+        num_wallets = vpwallets.size();
+    }
+    if (num_wallets > 0) {
+        StartThreadStakeMiner(*node.wallet_loader->context(), chainman, node.connman.get());
+    }
+#endif
 
     // ********************************************************* Step 13: finished
 

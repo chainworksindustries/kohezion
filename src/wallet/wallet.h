@@ -979,6 +979,32 @@ public:
 
     //! Whether the (external) signer performs R-value signature grinding
     bool CanGrindR() const;
+
+    //! staking-related variables
+    size_t nStakeThread = 1;
+
+    int nStakeLimitHeight = 0;
+    std::atomic<bool> fStakingEnabled{true};
+    CAmount nReserveBalance{0};
+    CAmount nStakeCombineThreshold;
+    CAmount nStakeSplitThreshold;
+    size_t nMaxStakeCombine = 3;
+    int64_t nLastCoinStakeSearchTime = 0;
+    mutable int m_greatest_txn_depth = 0;
+    mutable std::atomic_bool m_have_spendable_balance_cached {false};
+    mutable CAmount m_spendable_balance_cached = 0;
+
+    enum stakingState {
+        NOT_STAKING = 0,
+        IS_STAKING = 1,
+        NOT_STAKING_BALANCE = -1,
+        NOT_STAKING_DEPTH = -2,
+        NOT_STAKING_LOCKED = -3,
+        NOT_STAKING_LIMITED = -4,
+        NOT_STAKING_DISABLED = -5,
+    };
+
+    std::atomic<stakingState> m_is_staking {NOT_STAKING};
 };
 
 /**

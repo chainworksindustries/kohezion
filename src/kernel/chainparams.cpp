@@ -90,6 +90,12 @@ public:
         consensus.nPowTargetSpacing = 10 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
+        consensus.lastPoWBlock = 100;
+        consensus.posLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetTimespan = 5 * 60;
+        consensus.nPosTargetSpacing = 1 * 60;
+        consensus.nStakeMinAge = 10 * 60;
+        consensus.nStakeMaxAge = 60 * 60 * 24 * 30;
         consensus.nRuleChangeActivationThreshold = 1815; // 90% of 2016
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -210,6 +216,12 @@ public:
         consensus.nPowTargetSpacing = 10 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
+        consensus.lastPoWBlock = 100;
+        consensus.posLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetTimespan = 5 * 60;
+        consensus.nPosTargetSpacing = 1 * 60;
+        consensus.nStakeMinAge = 10 * 60;
+        consensus.nStakeMaxAge = 60 * 60 * 24 * 30;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -342,6 +354,12 @@ public:
         consensus.nPowTargetSpacing = 10 * 60;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
+        consensus.lastPoWBlock = 100;
+        consensus.posLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetTimespan = 5 * 60;
+        consensus.nPosTargetSpacing = 1 * 60;
+        consensus.nStakeMinAge = 10 * 60;
+        consensus.nStakeMaxAge = 60 * 60 * 24 * 30;
         consensus.nRuleChangeActivationThreshold = 1815; // 90% of 2016
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.MinBIP9WarningHeight = 0;
@@ -413,6 +431,12 @@ public:
         consensus.nPowTargetSpacing = 10 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
+        consensus.lastPoWBlock = 100;
+        consensus.posLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPosTargetTimespan = 5 * 60;
+        consensus.nPosTargetSpacing = 1 * 60;
+        consensus.nStakeMinAge = 10 * 60;
+        consensus.nStakeMaxAge = 60 * 60 * 24 * 30;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
 

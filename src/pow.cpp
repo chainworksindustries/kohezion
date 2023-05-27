@@ -10,10 +10,45 @@
 #include <primitives/block.h>
 #include <uint256.h>
 
+const CBlockIndex* GetLastPoSBlockIndex(const CBlockIndex* pindex)
+{
+    while (pindex && pindex->pprev && pindex->IsProofOfWork())
+        pindex = pindex->pprev;
+    return pindex;
+}
+
+unsigned int GetNextWorkRequiredPoS(const CBlockIndex* pindexLast, const Consensus::Params& params)
+{
+    const CBlockIndex* pindexPrev = GetLastPoSBlockIndex(pindexLast);
+    if (!pindexPrev->pprev)
+        return UintToArith256(params.posLimit).GetCompact();
+
+    const CBlockIndex* pindexPrevPrev = GetLastPoSBlockIndex(pindexPrev->pprev);
+    if (!pindexPrevPrev->pprev)
+        return UintToArith256(params.posLimit).GetCompact();
+
+    int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+
+    arith_uint256 bnNew;
+    bnNew.SetCompact(pindexPrev->nBits);
+    int64_t nInterval = params.nPosTargetTimespan / params.nPosTargetSpacing;
+    bnNew *= ((nInterval - 1) * params.nPosTargetSpacing + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * params.nPosTargetSpacing);
+
+    if (bnNew > UintToArith256(params.posLimit))
+        bnNew = UintToArith256(params.posLimit);
+
+    return bnNew.GetCompact();
+}
+
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+
+    if (pindexLast->nHeight + 1 > params.lastPoWBlock) {
+        return GetNextWorkRequiredPoS(pindexLast, params);
+    }
 
     // Only change once per difficulty adjustment interval
     if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)
