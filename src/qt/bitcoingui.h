@@ -71,6 +71,10 @@ class BitcoinGUI : public QMainWindow
     Q_OBJECT
 
 public:
+
+    // variable to give staking toggle menu option a state
+    bool m_is_staking;
+
     static const std::string DEFAULT_UIPLATFORM;
 
     explicit BitcoinGUI(interfaces::Node& node, const PlatformStyle *platformStyle, const NetworkStyle *networkStyle, QWidget *parent = nullptr);
@@ -123,6 +127,7 @@ private:
     WalletFrame* walletFrame = nullptr;
 
     UnitDisplayStatusBarControl* unitDisplayControl = nullptr;
+    QLabel* labelStakingIcon = nullptr;
     GUIUtil::ThemedLabel* labelWalletEncryptionIcon = nullptr;
     GUIUtil::ThemedLabel* labelWalletHDStatusIcon = nullptr;
     GUIUtil::ClickableLabel* labelProxyIcon = nullptr;
@@ -147,6 +152,7 @@ private:
     QAction* aboutAction = nullptr;
     QAction* receiveCoinsAction = nullptr;
     QAction* optionsAction = nullptr;
+    QAction* toggleStakingAction = nullptr;
     QAction* encryptWalletAction = nullptr;
     QAction* backupWalletAction = nullptr;
     QAction* changePassphraseAction = nullptr;
@@ -246,6 +252,10 @@ public Q_SLOTS:
     */
     void updateWalletStatus();
 
+    /** Set the UI status indicators based on the currently selected wallet.
+    */
+    void setStakingStatus();
+
 private:
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status
@@ -290,6 +300,9 @@ public Q_SLOTS:
     void gotoLoadPSBT(bool from_clipboard = false);
     /** Enable history action when privacy is changed */
     void enableHistoryAction(bool privacy);
+
+    /** Toggle staking */
+    void toggleStaking();
 
     /** Show open dialog */
     void openClicked();
