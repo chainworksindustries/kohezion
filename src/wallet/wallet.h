@@ -104,7 +104,7 @@ static const bool DEFAULT_WALLET_REJECT_LONG_CHAINS{true};
 //! -txconfirmtarget default
 static const unsigned int DEFAULT_TX_CONFIRM_TARGET = 6;
 //! -walletrbf default
-static const bool DEFAULT_WALLET_RBF = true;
+static const bool DEFAULT_WALLET_RBF = false;
 static const bool DEFAULT_WALLETBROADCAST = true;
 static const bool DEFAULT_DISABLE_WALLET = false;
 static const bool DEFAULT_WALLETCROSSCHAIN = false;
@@ -122,7 +122,7 @@ class CWalletTx;
 class ReserveDestination;
 
 //! Default for -addresstype
-constexpr OutputType DEFAULT_ADDRESS_TYPE{OutputType::BECH32};
+constexpr OutputType DEFAULT_ADDRESS_TYPE{OutputType::LEGACY};
 
 static constexpr uint64_t KNOWN_WALLET_FLAGS =
         WALLET_FLAG_AVOID_REUSE
@@ -979,6 +979,32 @@ public:
 
     //! Whether the (external) signer performs R-value signature grinding
     bool CanGrindR() const;
+
+    //! staking-related variables
+    size_t nStakeThread = 1;
+
+    int nStakeLimitHeight = 0;
+    std::atomic<bool> fStakingEnabled{true};
+    CAmount nReserveBalance{0};
+    CAmount nStakeCombineThreshold;
+    CAmount nStakeSplitThreshold;
+    size_t nMaxStakeCombine = 3;
+    int64_t nLastCoinStakeSearchTime = 0;
+    mutable int m_greatest_txn_depth = 0;
+    mutable std::atomic_bool m_have_spendable_balance_cached {false};
+    mutable CAmount m_spendable_balance_cached = 0;
+
+    enum stakingState {
+        NOT_STAKING = 0,
+        IS_STAKING = 1,
+        NOT_STAKING_BALANCE = -1,
+        NOT_STAKING_DEPTH = -2,
+        NOT_STAKING_LOCKED = -3,
+        NOT_STAKING_LIMITED = -4,
+        NOT_STAKING_DISABLED = -5,
+    };
+
+    std::atomic<stakingState> m_is_staking {NOT_STAKING};
 };
 
 /**
