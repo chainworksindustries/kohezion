@@ -1527,12 +1527,17 @@ PackageMempoolAcceptResult ProcessNewPackage(Chainstate& active_chainstate, CTxM
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
-    return 1 * COIN;
+    CAmount nSubsidy = 0.9 * COIN;
+
+    if (nHeight == 1)
+        nSubsidy = 4500000 * COIN;
+
+    return nSubsidy;
 }
 
 CAmount GetProofOfStakeReward(int nHeight, const Consensus::Params& consensusParams)
 {
-    return 1 * COIN;
+    return 0.9 * COIN;
 }
 
 CoinsViews::CoinsViews(DBParams db_params, CoinsViewOptions options)
