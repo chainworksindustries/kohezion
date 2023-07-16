@@ -141,7 +141,7 @@ void AddButtonShortcut(QAbstractButton* button, const QKeySequence& shortcut)
 
 bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no bitcoin: URI
+    // return if URI is not valid or is no kohezion: URI
     if(!uri.isValid() || uri.scheme() != QString("bitcoin"))
         return false;
 
