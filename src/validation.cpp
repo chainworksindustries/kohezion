@@ -3787,10 +3787,12 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
             if (block.vtx[0]->vin[0].scriptWitness.stack.size() != 1 || block.vtx[0]->vin[0].scriptWitness.stack[0].size() != 32) {
                 return state.Invalid(BlockValidationResult::BLOCK_MUTATED, "bad-witness-nonce-size", strprintf("%s : invalid witness reserved value size", __func__));
             }
-            CHash256().Write(hashWitness).Write(block.vtx[0]->vin[0].scriptWitness.stack[0]).Finalize(hashWitness);
-            if (memcmp(hashWitness.begin(), &block.vtx[0]->vout[commitpos].scriptPubKey[6], 32)) {
+#ifndef IGNORE_SEGWIT
+            CHash256().Write(hashWitness).Write(block.vtx[1]->vin[1].scriptWitness.stack[0]).Finalize(hashWitness);
+            if (memcmp(hashWitness.begin(), &block.vtx[1]->vout[commitpos].scriptPubKey[6], 32)) {
                 return state.Invalid(BlockValidationResult::BLOCK_MUTATED, "bad-witness-merkle-match", strprintf("%s : witness merkle commitment mismatch", __func__));
             }
+#endif
             fHaveWitness = true;
         }
     }
