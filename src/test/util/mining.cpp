@@ -4,6 +4,7 @@
 
 #include <test/util/mining.h>
 
+#include <arith_uint256.h>
 #include <chainparams.h>
 #include <consensus/merkle.h>
 #include <key_io.h>
@@ -48,11 +49,10 @@ std::vector<std::shared_ptr<CBlock>> CreateBlockChain(size_t total_height, const
         block.hashMerkleRoot = BlockMerkleRoot(block);
         block.nTime = ++time;
         block.nBits = params.GenesisBlock().nBits;
-        block.nNonce = 0;
+        block.nNonce = uint256();
 
         while (!CheckProofOfWork(block.GetHash(), block.nBits, params.GetConsensus())) {
-            ++block.nNonce;
-            assert(block.nNonce);
+            block.nNonce = ArithToUint256(UintToArith256(block.nNonce)++);
         }
     }
     return ret;
@@ -63,8 +63,7 @@ CTxIn MineBlock(const NodeContext& node, const CScript& coinbase_scriptPubKey)
     auto block = PrepareBlock(node, coinbase_scriptPubKey);
 
     while (!CheckProofOfWork(block->GetHash(), block->nBits, Params().GetConsensus())) {
-        ++block->nNonce;
-        assert(block->nNonce);
+        block->nNonce = ArithToUint256(UintToArith256(block->nNonce)++);
     }
 
     bool processed{Assert(node.chainman)->ProcessNewBlock(block, true, true, nullptr)};

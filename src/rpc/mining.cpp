@@ -40,6 +40,8 @@
 #include <validationinterface.h>
 #include <warnings.h>
 
+#include <crypto/equihash.h>
+
 #include <memory>
 #include <stdint.h>
 
@@ -117,26 +119,57 @@ static RPCHelpMan getnetworkhashps()
     };
 }
 
-static bool HasExceededTimeout(uint64_t& start_time, uint64_t& max_timeout)
-{
-    return (TicksSinceEpoch<std::chrono::seconds>(GetAdjustedTime()) - start_time) >= max_timeout;
-}
-
 static bool GenerateBlock(ChainstateManager& chainman, CBlock& block, uint64_t& max_timeout, std::shared_ptr<const CBlock>& block_out, bool process_new_block)
 {
     block_out.reset();
     block.hashMerkleRoot = BlockMerkleRoot(block);
 
-    uint64_t start_time = TicksSinceEpoch<std::chrono::seconds>(GetAdjustedTime());
-    while (!HasExceededTimeout(start_time, max_timeout) && block.nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(block.GetPoWHash(), block.nBits, chainman.GetConsensus()) && !ShutdownRequested()) {
-        ++block.nNonce;
+    const Consensus::Params& params = Params().GetConsensus();
+
+    {
+        // Initialize state
+        crypto_generichash_blake2b_state eh_state;
+        EhInitialiseState(params.nEquihashN, params.nEquihashK, eh_state);
+
+        // I = the block header minus nonce and solution.
+        CEquihashInput I{block};
+        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+        ss << I;
+
+        // H(I||...
+        crypto_generichash_blake2b_update(&eh_state, (unsigned char*)&ss[0], ss.size());
+
+        while (true)
+        {
+            block.nNonce = ArithToUint256(UintToArith256(block.nNonce) + 1);
+
+            // H(I||V||...
+            crypto_generichash_blake2b_state curr_state(eh_state);
+            crypto_generichash_blake2b_update(&curr_state,
+                                              block.nNonce.begin(),
+                                              block.nNonce.size());
+
+            // (x_1, x_2, ...) = A(I, V, n, k)
+            std::function<bool(std::vector<unsigned char>)> validBlock =
+                    [&block](std::vector<unsigned char> soln) {
+                block.nSolution = soln;
+                return CheckProofOfWork(block.GetHash(), block.nBits, Params().GetConsensus());
+            };
+
+            std::mutex m_cs;
+            bool cancelSolver = false;
+            std::function<bool(EhSolverCancelCheck)> cancelled = [&m_cs, &cancelSolver](EhSolverCancelCheck pos) {
+                std::lock_guard<std::mutex> lock{m_cs};
+                return cancelSolver;
+            };
+
+            if (EhOptimisedSolve(params.nEquihashN, params.nEquihashK, curr_state, validBlock, cancelled)) {
+                goto endloop;
+            }
+        }
     }
-    if (HasExceededTimeout(start_time, max_timeout) || ShutdownRequested()) {
-        return false;
-    }
-    if (block.nNonce == std::numeric_limits<uint32_t>::max()) {
-        return true;
-    }
+
+endloop:
 
     block_out = std::make_shared<const CBlock>(block);
 
@@ -782,7 +815,7 @@ static RPCHelpMan getblocktemplate()
 
     // Update nTime
     UpdateTime(pblock, consensusParams, pindexPrev);
-    pblock->nNonce = 0;
+    pblock->nNonce = uint256();
 
     // NOTE: If at some point we support pre-segwit miners post-segwit-activation, this needs to take segwit support into consideration
     const bool fPreSegWit = !DeploymentActiveAfter(pindexPrev, chainman, Consensus::DEPLOYMENT_SEGWIT);

@@ -210,9 +210,11 @@ public:
     //! block header
     int32_t nVersion{0};
     uint256 hashMerkleRoot{};
+    uint256 hashFinalSaplingRoot{};
     uint32_t nTime{0};
     uint32_t nBits{0};
-    uint32_t nNonce{0};
+    uint256 nNonce{};
+    std::vector<unsigned char> nSolution;
 
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     int32_t nSequenceId{0};
@@ -223,9 +225,11 @@ public:
     explicit CBlockIndex(const CBlockHeader& block)
         : nVersion{block.nVersion},
           hashMerkleRoot{block.hashMerkleRoot},
+          hashFinalSaplingRoot{block.hashFinalSaplingRoot},
           nTime{block.nTime},
           nBits{block.nBits},
-          nNonce{block.nNonce}
+          nNonce{block.nNonce},
+          nSolution{block.nSolution}
     {
     }
 
@@ -258,9 +262,11 @@ public:
         if (pprev)
             block.hashPrevBlock = pprev->GetBlockHash();
         block.hashMerkleRoot = hashMerkleRoot;
+        block.hashFinalSaplingRoot   = hashFinalSaplingRoot;
         block.nTime = nTime;
         block.nBits = nBits;
         block.nNonce = nNonce;
+        block.nSolution = nSolution;
         return block;
     }
 
@@ -311,7 +317,7 @@ public:
 
     bool IsProofOfStake() const
     {
-        return (nNonce == 0);
+        return (nNonce == uint256());
     }
 
     static constexpr int nMedianTimeSpan = 11;
@@ -455,9 +461,11 @@ public:
         READWRITE(obj.nVersion);
         READWRITE(obj.hashPrev);
         READWRITE(obj.hashMerkleRoot);
+        READWRITE(obj.hashFinalSaplingRoot);
         READWRITE(obj.nTime);
         READWRITE(obj.nBits);
         READWRITE(obj.nNonce);
+        READWRITE(obj.nSolution);
     }
 
     uint256 ConstructBlockHash() const
@@ -466,9 +474,11 @@ public:
         block.nVersion = nVersion;
         block.hashPrevBlock = hashPrev;
         block.hashMerkleRoot = hashMerkleRoot;
+        block.hashFinalSaplingRoot = hashFinalSaplingRoot;
         block.nTime = nTime;
         block.nBits = nBits;
         block.nNonce = nNonce;
+        block.nSolution = nSolution;
         return block.GetHash();
     }
 

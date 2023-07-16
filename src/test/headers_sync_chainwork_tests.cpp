@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <arith_uint256.h>
 #include <chain.h>
 #include <chainparams.h>
 #include <consensus/params.h>
@@ -29,7 +30,7 @@ struct HeadersGeneratorSetup : public RegTestingSetup {
 void HeadersGeneratorSetup::FindProofOfWork(CBlockHeader& starting_header)
 {
     while (!CheckProofOfWork(starting_header.GetHash(), starting_header.nBits, Params().GetConsensus())) {
-        ++(starting_header.nNonce);
+        starting_header.nNonce = ArithToUint256(UintToArith256(starting_header.nNonce)++);
     }
 }
 

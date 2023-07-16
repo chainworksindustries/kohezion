@@ -1585,6 +1585,10 @@ if test "$use_tests" = "yes"; then
   fi
 fi
 
+dnl sodium check
+PKG_CHECK_MODULES([SODIUM], [libsodium],, [AC_MSG_ERROR(sodium not found.)])
+AC_CHECK_LIB([sodium], [main], SODIUM_LIBS=-lsodium, AC_MSG_ERROR(libsodium missing))
+
 dnl openssl check
 
 if test "x$pkg_openssl" = xyes; then

@@ -85,6 +85,7 @@ static int AppInitUtil(ArgsManager& args, int argc, char* argv[])
 
 static void grind_task(uint32_t nBits, CBlockHeader header, uint32_t offset, uint32_t step, std::atomic<bool>& found, uint32_t& proposed_nonce)
 {
+#ifdef IGNORE_EQUIHASH
     arith_uint256 target;
     bool neg, over;
     target.SetCompact(nBits, &neg, &over);
@@ -106,10 +107,12 @@ static void grind_task(uint32_t nBits, CBlockHeader header, uint32_t offset, uin
             header.nNonce += step;
         } while(header.nNonce != next);
     }
+#endif
 }
 
 static int Grind(const std::vector<std::string>& args, std::string& strPrint)
 {
+#ifdef IGNORE_EQUIHASH
     if (args.size() != 1) {
         strPrint = "Must specify block header to grind";
         return EXIT_FAILURE;
@@ -144,6 +147,7 @@ static int Grind(const std::vector<std::string>& args, std::string& strPrint)
     DataStream ss{};
     ss << header;
     strPrint = HexStr(ss);
+#endif
     return EXIT_SUCCESS;
 }
 

@@ -172,8 +172,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if (!fProofOfStake) {
         UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
     }
-    pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
-    pblock->nNonce         = !fProofOfStake;
+    pblock->nBits          = GetNextWorkRequired(pindexPrev, fProofOfStake, chainparams.GetConsensus());
+    pblock->nNonce         = ArithToUint256(!fProofOfStake);
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
 
     BlockValidationState state;

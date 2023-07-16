@@ -7,6 +7,7 @@
 #define BITCOIN_HASH_H
 
 #include <attributes.h>
+#include <chainparams.h>
 #include <crypto/common.h>
 #include <crypto/ripemd160.h>
 #include <crypto/scrypt.h>
@@ -299,5 +300,7 @@ inline uint160 RIPEMD160(Span<const unsigned char> data)
     CRIPEMD160().Write(data.data(), data.size()).Finalize(result.begin());
     return result;
 }
+
+bool CheckEquihashSolution(const CBlockHeader *pblock, const Consensus::Params& params);
 
 #endif // BITCOIN_HASH_H

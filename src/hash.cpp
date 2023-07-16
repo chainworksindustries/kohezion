@@ -5,6 +5,7 @@
 #include <hash.h>
 #include <span.h>
 #include <crypto/common.h>
+#include <crypto/equihash.h>
 #include <crypto/hmac_sha512.h>
 
 #include <string>
@@ -94,3 +95,32 @@ HashWriter TaggedHash(const std::string& tag)
     writer << taghash << taghash;
     return writer;
 }
+
+bool CheckEquihashSolution(const CBlockHeader *pblock, const Consensus::Params& params)
+{
+    unsigned int n = 200;
+    unsigned int k = 9;
+
+    // Hash state
+    crypto_generichash_blake2b_state state;
+    EhInitialiseState(n, k, state);
+   
+    // I = the block header minus nonce and solution.
+    CEquihashInput I{*pblock};
+
+    // I||V
+    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+    ss << I;
+    ss << pblock->nNonce;
+
+    // H(I||V||...
+    crypto_generichash_blake2b_update(&state, (unsigned char*)&ss[0], ss.size());
+
+    bool isValid;
+    EhIsValidSolution(n, k, state, pblock->nSolution, isValid);
+    if (!isValid)
+        return false;
+
+    return true;
+}
+

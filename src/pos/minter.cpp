@@ -543,6 +543,11 @@ bool CreateCoinStake(wallet::CWallet* wallet, CBlockIndex* pindexPrev, unsigned 
             return false;
         }
 
+        auto mempool = chain_state.GetMempool();
+        if (!mempool->HasNoInputsOf(*pcoin.first->tx)) {
+            continue;
+        }
+
         int64_t nBlockTime;
         COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
         if (CheckKernel(chain_state, pindexPrev, nBits, nTime, prevoutStake, &nBlockTime)) {

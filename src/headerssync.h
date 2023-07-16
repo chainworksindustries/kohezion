@@ -22,22 +22,29 @@ struct CompressedHeader {
     // header
     int32_t nVersion{0};
     uint256 hashMerkleRoot;
+    uint256 hashFinalSaplingRoot;
     uint32_t nTime{0};
     uint32_t nBits{0};
-    uint32_t nNonce{0};
+    uint256 nNonce;
+    std::vector<unsigned char> nSolution;
 
     CompressedHeader()
     {
         hashMerkleRoot.SetNull();
+        hashFinalSaplingRoot.SetNull();
+        nNonce.SetNull();
+        nSolution.clear();
     }
 
     CompressedHeader(const CBlockHeader& header)
     {
         nVersion = header.nVersion;
         hashMerkleRoot = header.hashMerkleRoot;
+        hashFinalSaplingRoot = header.hashFinalSaplingRoot;
         nTime = header.nTime;
         nBits = header.nBits;
         nNonce = header.nNonce;
+        nSolution = header.nSolution;
     }
 
     CBlockHeader GetFullHeader(const uint256& hash_prev_block) {
@@ -45,9 +52,11 @@ struct CompressedHeader {
         ret.nVersion = nVersion;
         ret.hashPrevBlock = hash_prev_block;
         ret.hashMerkleRoot = hashMerkleRoot;
+        ret.hashFinalSaplingRoot = hashFinalSaplingRoot;
         ret.nTime = nTime;
         ret.nBits = nBits;
         ret.nNonce = nNonce;
+        ret.nSolution = nSolution;
         return ret;
     };
 };

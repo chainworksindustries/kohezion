@@ -24,7 +24,7 @@ check_PROGRAMS =
 TESTS =
 BENCHMARKS =
 
-BITCOIN_INCLUDES=-I$(builddir) -I$(srcdir)/$(MINISKETCH_INCLUDE_DIR_INT) -I$(srcdir)/secp256k1/include -I$(srcdir)/$(UNIVALUE_INCLUDE_DIR_INT) $(LEVELDB_CPPFLAGS)
+BITCOIN_INCLUDES=-I$(builddir) -I$(srcdir)/$(MINISKETCH_INCLUDE_DIR_INT) -I$(srcdir)/secp256k1/include -I$(srcdir)/$(UNIVALUE_INCLUDE_DIR_INT) $(LEVELDB_CPPFLAGS) $(SODIUM_CFLAGS)
 
 LIBBITCOIN_NODE=libkohezion_node.a
 LIBBITCOIN_COMMON=libkohezion_common.a
@@ -544,6 +544,9 @@ crypto_libkohezion_crypto_base_la_SOURCES = \
   crypto/chacha20.h \
   crypto/chacha20.cpp \
   crypto/common.h \
+  crypto/equihash.cpp \
+  crypto/equihash.h \
+  crypto/equihash.tcc \
   crypto/hkdf_sha256_32.cpp \
   crypto/hkdf_sha256_32.h \
   crypto/hmac_sha256.cpp \
@@ -665,6 +668,7 @@ libkohezion_common_a_SOURCES = \
   core_write.cpp \
   deploymentinfo.cpp \
   external_signer.cpp \
+  genesis.cpp \
   init/common.cpp \
   kernel/chainparams.cpp \
   key.cpp \
@@ -774,6 +778,7 @@ kohezion_bin_ldadd = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
+  $(SODIUM_LIBS) \
   $(LIBSECP256K1)
 
 kohezion_bin_ldadd += $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(NATPMP_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(SQLITE_LIBS)
@@ -788,13 +793,13 @@ kohezion_node_SOURCES = $(kohezion_daemon_sources) init/bitcoin-node.cpp
 kohezion_node_CPPFLAGS = $(kohezion_bin_cppflags)
 kohezion_node_CXXFLAGS = $(kohezion_bin_cxxflags)
 kohezion_node_LDFLAGS = $(kohezion_bin_ldflags)
-kohezion_node_LDADD = $(LIBBITCOIN_NODE) $(kohezion_bin_ldadd) $(LIBBITCOIN_IPC) $(LIBMULTIPROCESS_LIBS)
+kohezion_node_LDADD = $(LIBBITCOIN_NODE) $(kohezion_bin_ldadd) $(LIBBITCOIN_IPC) $(LIBMULTIPROCESS_LIBS) $(SODIUM_LIBS)
 
 # bitcoin-cli binary #
 kohezion_cli_SOURCES = bitcoin-cli.cpp
 kohezion_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
 kohezion_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-kohezion_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+kohezion_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS) $(SODIUM_LIBS)
 
 if TARGET_WINDOWS
 kohezion_cli_SOURCES += bitcoin-cli-res.rc
@@ -807,7 +812,7 @@ kohezion_cli_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-kohezion_cli_LDADD += $(CRYPTO_LIBS) $(EVENT_LIBS)
+kohezion_cli_LDADD += $(CRYPTO_LIBS) $(EVENT_LIBS) $(SODIUM_LIBS)
 #
 
 # bitcoin-tx binary #
@@ -827,6 +832,7 @@ kohezion_tx_LDADD = \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
   $(CRYPTO_LIBS) \
+  $(SODIUM_LIBS) \
   $(LIBSECP256K1)
 #
 
@@ -845,6 +851,7 @@ kohezion_wallet_LDADD = \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1) \
+  $(SODIUM_LIBS) \
   $(BDB_LIBS) \
   $(CRYPTO_LIBS) \
   $(SQLITE_LIBS)
@@ -870,6 +877,7 @@ kohezion_util_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
+  $(SODIUM_LIBS) \
   $(CRYPTO_LIBS) \
   $(LIBSECP256K1)
 #
@@ -1002,8 +1010,8 @@ lib_LTLIBRARIES += $(LIBBITCOINCONSENSUS)
 include_HEADERS = script/bitcoinconsensus.h
 libbitcoinconsensus_la_SOURCES = support/cleanse.cpp $(crypto_libkohezion_crypto_base_la_SOURCES) $(libkohezion_consensus_a_SOURCES)
 
-libbitcoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libbitcoinconsensus_la_LIBADD = $(LIBSECP256K1) $(CRYPTO_LIBS)
+libbitcoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) $(SODIUM_LIBS)
+libbitcoinconsensus_la_LIBADD = $(LIBSECP256K1) $(CRYPTO_LIBS) $(SODIUM_LIBS)
 libbitcoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL $(SSL_CFLAGS)
 libbitcoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 

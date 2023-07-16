@@ -4,6 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <arith_uint256.h>
 #include <chainparams.h>
 #include <consensus/merkle.h>
 #include <consensus/validation.h>
@@ -95,7 +96,7 @@ std::shared_ptr<CBlock> MinerTestingSetup::FinalizeBlock(std::shared_ptr<CBlock>
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
     while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus())) {
-        ++(pblock->nNonce);
+        pblock->nNonce = ArithToUint256(UintToArith256(pblock->nNonce)++);
     }
 
     // submit block header, so that miner can get the block height from the
