@@ -224,7 +224,7 @@ bool SignBlock(CBlock& block, CBlockIndex* pindexPrev, wallet::CWallet* wallet, 
     }
 
     CKey key;
-    block.nBits = GetNextWorkRequiredPoS(pindexPrev, Params().GetConsensus());
+    block.nBits = GetNextWorkRequired(pindexPrev, true, Params().GetConsensus());
     LogPrintf("%s: nBits %d\n", __func__, block.nBits);
 
     CAmount nFees = 0;
@@ -654,7 +654,7 @@ bool CreateCoinStake(wallet::CWallet* wallet, CBlockIndex* pindexPrev, unsigned 
     const Consensus::Params& consensusParams = Params().GetConsensus();
 
     // Get block reward
-    CAmount nReward = GetBlockSubsidy(pindexPrev->nHeight + 1, consensusParams);
+    CAmount nReward = GetProofOfStakeReward(pindexPrev->nHeight + 1, consensusParams);
     if (nReward < 0) {
         return false;
     }

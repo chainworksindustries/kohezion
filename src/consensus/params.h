@@ -122,7 +122,10 @@ struct Params {
     int64_t nPosTargetTimespan;
     int nStakeMinAge{0};
     int nStakeMaxAge{0};
-    int lastPoWBlock{0};
+    std::chrono::seconds PosTargetSpacing() const
+    {
+        return std::chrono::seconds{nPosTargetSpacing};
+    }
     /** The best chain should have at least this much work */
     uint256 nMinimumChainWork;
     /** By default assume that the signatures in ancestors of this block are valid */

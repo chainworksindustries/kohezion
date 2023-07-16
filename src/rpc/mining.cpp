@@ -446,8 +446,8 @@ static RPCHelpMan getmininginfo()
     if (BlockAssembler::m_last_block_weight) obj.pushKV("currentblockweight", *BlockAssembler::m_last_block_weight);
     if (BlockAssembler::m_last_block_num_txs) obj.pushKV("currentblocktx", *BlockAssembler::m_last_block_num_txs);
     UniValue obj2(UniValue::VOBJ);
-    obj2.pushKV("proof-of-work", GetDifficulty(active_chain.Tip()));
-    obj2.pushKV("proof-of-stake", GetDifficulty(GetLastPoSBlockIndex(active_chain.Tip())));
+    obj2.pushKV("proof-of-work", GetDifficulty(GetLastBlockIndex(active_chain.Tip(), false)));
+    obj2.pushKV("proof-of-stake", GetDifficulty(GetLastBlockIndex(active_chain.Tip(), true)));
     obj.pushKV("difficulty", obj2);
     obj.pushKV("networkhashps",    getnetworkhashps().HandleRequest(request));
     obj.pushKV("pooledtx",         (uint64_t)mempool.size());
