@@ -32,7 +32,7 @@ LIBBITCOIN_CONSENSUS=libkohezion_consensus.a
 LIBBITCOIN_CLI=libkohezion_cli.a
 LIBBITCOIN_UTIL=libkohezion_util.a
 LIBBITCOIN_CRYPTO_BASE=crypto/libkohezion_crypto_base.la
-LIBBITCOINQT=qt/libbitcoinqt.a
+LIBBITCOINQT=qt/libkohezionqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
 if ENABLE_ZMQ

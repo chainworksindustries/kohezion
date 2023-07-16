@@ -65,9 +65,9 @@ CLEAN_BITCOIN_QT_TEST = $(TEST_QT_MOC_CPP) qt/test/*.gcda qt/test/*.gcno
 
 CLEANFILES += $(CLEAN_BITCOIN_QT_TEST)
 
-test_kohezion_qt : qt/test/test_bitcoin-qt$(EXEEXT)
+test_kohezion_qt : qt/test/test_kohezion-qt$(EXEEXT)
 
-test_kohezion_qt_check : qt/test/test_bitcoin-qt$(EXEEXT) FORCE
+test_kohezion_qt_check : qt/test/test_kohezion-qt$(EXEEXT) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
 test_kohezion_qt_clean: FORCE

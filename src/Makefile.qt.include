@@ -385,7 +385,7 @@ CLEAN_QT = $(nodist_qt_libkohezionqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda
 CLEANFILES += $(CLEAN_QT)
 
 kohezion_qt_clean: FORCE
-	rm -f $(CLEAN_QT) $(qt_libkohezionqt_a_OBJECTS) $(qt_kohezion_qt_OBJECTS) qt/bitcoin-qt$(EXEEXT) $(LIBBITCOINQT)
+	rm -f $(CLEAN_QT) $(qt_libkohezionqt_a_OBJECTS) $(qt_kohezion_qt_OBJECTS) qt/kohezion-qt$(EXEEXT) $(LIBBITCOINQT)
 
 kohezion_qt : qt/kohezion-qt$(EXEEXT)
 
@@ -399,7 +399,7 @@ kohezion_qt_apk: FORCE
 	cp $(dir $(lastword $(CC)))../sysroot/usr/lib/$(host_alias)/libc++_shared.so $(APK_LIB_DIR)
 	tar xf $(QT_BASE_PATH) -C qt/android/src/ $(QT_BASE_TLD)src/android/jar/src --strip-components=5
 	tar xf $(QT_BASE_PATH) -C qt/android/src/ $(QT_BASE_TLD)src/android/java/src --strip-components=5
-	cp qt/bitcoin-qt $(APK_LIB_DIR)/libkohezion-qt_$(ANDROID_ARCH).so
+	cp qt/kohezion-qt $(APK_LIB_DIR)/libkohezion-qt_$(ANDROID_ARCH).so
 	cd qt/android && gradle wrapper --gradle-version=6.6.1
 	cd qt/android && ./gradlew build
 
