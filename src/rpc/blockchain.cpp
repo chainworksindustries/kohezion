@@ -425,8 +425,8 @@ static RPCHelpMan getdifficulty()
     ChainstateManager& chainman = EnsureAnyChainman(request.context);
     LOCK(cs_main);
     UniValue obj(UniValue::VOBJ);
-    obj.pushKV("proof-of-work", GetDifficulty(chainman.ActiveChain().Tip()));
-    obj.pushKV("proof-of-stake", GetDifficulty(GetLastPoSBlockIndex(chainman.ActiveChain().Tip())));
+    obj.pushKV("proof-of-work", GetDifficulty(GetLastBlockIndex(chainman.ActiveChain().Tip(), false)));
+    obj.pushKV("proof-of-stake", GetDifficulty(GetLastBlockIndex(chainman.ActiveChain().Tip(), true)));
     return obj;
 },
     };
@@ -1269,8 +1269,8 @@ RPCHelpMan getblockchaininfo()
     obj.pushKV("headers", chainman.m_best_header ? chainman.m_best_header->nHeight : -1);
     obj.pushKV("bestblockhash", tip.GetBlockHash().GetHex());
     UniValue obj2(UniValue::VOBJ);
-    obj2.pushKV("proof-of-work", GetDifficulty(&tip));
-    obj2.pushKV("proof-of-stake", GetDifficulty(GetLastPoSBlockIndex(&tip)));
+    obj2.pushKV("proof-of-work", GetDifficulty(GetLastBlockIndex(&tip, false)));
+    obj2.pushKV("proof-of-stake", GetDifficulty(GetLastBlockIndex(&tip, true)));
     obj.pushKV("difficulty", obj2);
     obj.pushKV("time", tip.GetBlockTime());
     obj.pushKV("mediantime", tip.GetMedianTimePast());
