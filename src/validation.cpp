@@ -3496,10 +3496,14 @@ void Chainstate::ReceivedBlockTransactions(const CBlock& block, CBlockIndex* pin
 
 static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    bool isPoS = block.nNonce == 0;
+    bool isPoS = block.nNonce == uint256();
+
+    // Check Equihash solution is valid
+    if (fCheckPOW && !isPoS && !CheckEquihashSolution(&block, consensusParams))
+        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
 
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !isPoS && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams))
+    if (fCheckPOW && !isPoS && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
 
     return true;
@@ -3668,8 +3672,8 @@ bool HasValidProofOfWork(const std::vector<CBlockHeader>& headers, const Consens
 {
     return std::all_of(headers.cbegin(), headers.cend(),
             [&](const auto& header) {
-                bool isPoS = !header.nNonce;
-                return isPoS ? true : CheckProofOfWork(header.GetPoWHash(), header.nBits, consensusParams);
+                bool isPoS = header.nNonce == uint256();
+                return isPoS ? true : CheckProofOfWork(header.GetHash(), header.nBits, consensusParams);
             });
 }
 
@@ -3698,7 +3702,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
     assert(pindexPrev != nullptr);
     const int nHeight = pindexPrev->nHeight + 1;
 
-    bool fProofOfStake = block.nNonce == 0;
+    bool fProofOfStake = block.nNonce == uint256();
 
     // Check proof of work
     const Consensus::Params& consensusParams = chainman.GetConsensus();

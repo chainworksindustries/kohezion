@@ -325,6 +325,9 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
                 pindexNew->prevoutStake   = diskindex.prevoutStake;
                 pindexNew->hashProof      = diskindex.hashProof;
 
+                pindexNew->hashFinalSaplingRoot = diskindex.hashFinalSaplingRoot;
+                pindexNew->nSolution      = diskindex.nSolution;
+
                 pcursor->Next();
             } else {
                 return error("%s: failed to read value", __func__);

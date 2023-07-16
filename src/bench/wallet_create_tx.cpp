@@ -58,7 +58,7 @@ void generateFakeBlock(const CChainParams& params,
     block.hashMerkleRoot = BlockMerkleRoot(block);
     block.nTime = ++tip.prev_block_time;
     block.nBits = params.GenesisBlock().nBits;
-    block.nNonce = 0;
+    block.nNonce = uint256();
 
     {
         LOCK(::cs_main);

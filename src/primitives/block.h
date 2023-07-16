@@ -26,25 +26,38 @@ public:
     int32_t nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;
+    uint256 hashFinalSaplingRoot;
     uint32_t nTime;
     uint32_t nBits;
-    uint32_t nNonce;
+    uint256 nNonce;
+    std::vector<unsigned char> nSolution;
 
     CBlockHeader()
     {
         SetNull();
     }
 
-    SERIALIZE_METHODS(CBlockHeader, obj) { READWRITE(obj.nVersion, obj.hashPrevBlock, obj.hashMerkleRoot, obj.nTime, obj.nBits, obj.nNonce); }
+    SERIALIZE_METHODS(CBlockHeader, obj) {
+        READWRITE(obj.nVersion);
+        READWRITE(obj.hashPrevBlock);
+        READWRITE(obj.hashMerkleRoot);
+        READWRITE(obj.hashFinalSaplingRoot);
+        READWRITE(obj.nTime);
+        READWRITE(obj.nBits);
+        READWRITE(obj.nNonce);
+        READWRITE(obj.nSolution);
+    }
 
     void SetNull()
     {
         nVersion = 0;
         hashPrevBlock.SetNull();
         hashMerkleRoot.SetNull();
+        hashFinalSaplingRoot.SetNull();
         nTime = 0;
         nBits = 0;
-        nNonce = 0;
+        nNonce = uint256();
+        nSolution.clear();
     }
 
     bool IsNull() const
@@ -63,7 +76,7 @@ public:
 
     bool IsProofOfStake() const
     {
-        return (nNonce == 0);
+        return (nNonce == uint256());
     }
 
     NodeSeconds Time() const
@@ -133,13 +146,39 @@ public:
         block.nVersion       = nVersion;
         block.hashPrevBlock  = hashPrevBlock;
         block.hashMerkleRoot = hashMerkleRoot;
+        block.hashFinalSaplingRoot   = hashFinalSaplingRoot;
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.nSolution      = nSolution;
         return block;
     }
 
     std::string ToString() const;
+};
+
+/**
+ * Custom serializer for CBlockHeader that omits the nonce and solution, for use
+ * as input to Equihash.
+ */
+class CEquihashInput : private CBlockHeader
+{
+public:
+    CEquihashInput(const CBlockHeader &header)
+    {
+        CBlockHeader::SetNull();
+        *((CBlockHeader*)this) = header;
+    }
+
+    SERIALIZE_METHODS(CEquihashInput, obj)
+    {
+        READWRITE(obj.nVersion);
+        READWRITE(obj.hashPrevBlock);
+        READWRITE(obj.hashMerkleRoot);
+        READWRITE(obj.hashFinalSaplingRoot);
+        READWRITE(obj.nTime);
+        READWRITE(obj.nBits);
+    }
 };
 
 /** Describes a place in the block chain to another node such that if the
