@@ -987,7 +987,7 @@ public:
     std::atomic<bool> fStakingEnabled{true};
     CAmount nReserveBalance{0};
     CAmount nStakeCombineThreshold;
-    CAmount nStakeSplitThreshold;
+    CAmount nStakeSplitThreshold{COIN};
     size_t nMaxStakeCombine = 3;
     int64_t nLastCoinStakeSearchTime = 0;
     mutable int m_greatest_txn_depth = 0;
