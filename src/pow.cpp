@@ -27,14 +27,16 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, bool fProofOfSta
     if (!pindexPrevPrev->pprev)
         return UintToArith256(fProofOfStake ? params.posLimit : params.powLimit).GetCompact();
 
-    // first 250 blocks are mindiff
-    if (pindexLast->nHeight + 1 <= 250)
-        return UintToArith256(fProofOfStake ? params.posLimit : params.powLimit).GetCompact();
+    uint256 newMinDiff = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+    if (pindexLast->nHeight + 1 <= 125) {
+        return UintToArith256(newMinDiff).GetCompact();
+    }
 
     int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
     int64_t nTargetTimespan = fProofOfStake ? params.nPosTargetTimespan : params.nPowTargetTimespan;
     int64_t nTargetSpacing = fProofOfStake ? params.nPosTargetSpacing : params.nPowTargetSpacing;
-    uint256 nLimit = fProofOfStake ? params.posLimit : params.powLimit;
+    uint256 nLimit = newMinDiff;
 
     arith_uint256 bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
