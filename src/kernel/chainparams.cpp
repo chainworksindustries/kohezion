@@ -136,7 +136,7 @@ public:
         pchMessageStart[1] = 0xa6;
         pchMessageStart[2] = 0xa9;
         pchMessageStart[3] = 0xa7;
-        nDefaultPort = 8822;
+        nDefaultPort = 3690;
         nPruneAfterHeight = 100000;
         m_assumed_blockchain_size = 2;
         m_assumed_chain_state_size = 1;
@@ -157,7 +157,7 @@ public:
 
         bech32_hrp = "khz";
 
-        //vFixedSeeds = std::vector<uint8_t>(std::begin(chainparams_seed_main), std::end(chainparams_seed_main));
+        vFixedSeeds = std::vector<uint8_t>(std::begin(chainparams_seed_main), std::end(chainparams_seed_main));
 
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
