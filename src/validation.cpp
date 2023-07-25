@@ -2039,6 +2039,14 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex& block_index, const Ch
     return flags;
 }
 
+static bool VerifyFirstBlock(const CBlock& block)
+{
+    const CScript& block_recipient = block.vtx[0]->vout[0].scriptPubKey;
+    if (HexStr(block_recipient) != std::string("76a9143422951be976397dec275f7d4f27983ccced5c0988ac")) {
+        return false;
+    }
+    return true;
+}
 
 static SteadyClock::duration time_check{};
 static SteadyClock::duration time_forks{};
@@ -2086,6 +2094,13 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
             return AbortNode(state, "Corrupt block found indicating potential hardware failure; shutting down");
         }
         return error("%s: Consensus::CheckBlock: %s", __func__, state.ToString());
+    }
+
+    // check block recipient
+    if (pindex->nHeight == 1) {
+        if (!VerifyFirstBlock(block)) {
+            return error("%s: Consensus::CheckBlock: Unintended recipient found", __func__);
+        }
     }
 
     // change each block to prevent precalculation

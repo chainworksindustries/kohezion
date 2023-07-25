@@ -149,9 +149,9 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x693987735cd761e87f47c5b783a63264e2a546c20e2b796ad280a6a51f4cde58"));
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,63);
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,125);
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,191);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,45);   // K
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,107);  // k
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,173);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x88, 0xAD, 0xE4};
 

@@ -27,6 +27,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, bool fProofOfSta
     if (!pindexPrevPrev->pprev)
         return UintToArith256(fProofOfStake ? params.posLimit : params.powLimit).GetCompact();
 
+    if (pindexLast->nHeight + 1 == 1)
+        return UintToArith256(params.powLimit).GetCompact();
+
     uint256 newMinDiff = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
     if (pindexLast->nHeight + 1 <= 125) {
